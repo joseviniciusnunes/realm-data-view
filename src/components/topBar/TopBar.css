@@ -1,0 +1,72 @@
+.box-top-bar {
+    height: 35px;
+    min-height: 35px;
+    width: '100%';
+    background-color: #50525b;
+    display: flex;
+    flex-direction: 'row';
+    box-shadow: 0px 5px 23px -13px rgba(0, 0, 0, 0.1);
+    -webkit-app-region: drag;
+}
+
+.box-top-bar .left {
+    flex: 1;
+    display: flex;
+    flex-direction: row;
+    justify-content: flex-start;
+    align-items: center;
+}
+
+.box-top-bar .left .img-logo {
+    margin-left: 8px;
+}
+
+.box-top-bar .center {
+    flex: 1;
+    color: #fff;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-weight: bold;
+}
+
+.box-top-bar .right {
+    flex: 1;
+    display: flex;
+    justify-content: flex-end;
+    align-items: center;
+}
+
+.box-top-bar .icon {
+    height: 100%;
+    width: 60px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    -webkit-app-region: no-drag;
+}
+
+.box-top-bar .icon-close {
+    color: #fff;
+    font-size: 28px;
+}
+.box-top-bar .icon-expanted {
+    color: #fff;
+    font-size: 19px;
+}
+.box-top-bar .icon-drop {
+    color: #fff;
+    font-size: 23px;
+}
+.box-top-bar .icon-minimized {
+    color: #fff;
+    font-size: 23px;
+}
+
+.box-top-bar .icon:hover {
+    background-color: #313338;
+}
+
+.box-top-bar .icon:active {
+    background-color: #45484f;
+}
