@@ -4,4 +4,8 @@
 </p>
 <br />
 
-## Alpha version made available
+### Alpha version available for Windows, soon Mac OS ...
+
+<p align="center">
+  <img src="https://user-images.githubusercontent.com/22475804/87746674-8874d980-c7c7-11ea-887c-27cdd85d13a9.png">  
+</p>
