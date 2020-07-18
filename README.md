@@ -5,7 +5,15 @@
 </p>
 <br />
 
-### Alpha version available for Windows, soon Mac OS ...
+### Beta 1.0.0 version available for Windows, Linux, Mac
+
+## Requirements
+
+-   Adb must be in the system path
+-   The device must contain root
+-   AVD use "Google APIs Intel x86 Atom System Image" not use "Google Play Intel x86 Atom System Image"
+
+##### Preview
 
 <p align="center">
   <img src="https://user-images.githubusercontent.com/22475804/87746674-8874d980-c7c7-11ea-887c-27cdd85d13a9.png">  
