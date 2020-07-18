@@ -5,7 +5,7 @@
 </p>
 <br />
 
-### Beta 1.0.0 version available for Windows, Linux, Mac
+### Beta 1.0.0 version available for Windows, Linux, Mac [(Download)](https://github.com/joseviniciusnunes/realm-data-view/releases)
 
 ## Requirements
 
