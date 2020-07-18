@@ -2,19 +2,18 @@
 import React, { useEffect, useState, useCallback } from 'react';
 import './App.css';
 import { MdAndroid } from "react-icons/md";
-import { IoIosArrowDown, } from "react-icons/io";
+import { IoIosArrowDown, IoIosRefresh } from "react-icons/io";
 import { FiTrash2 } from "react-icons/fi";
-import Select from 'react-select';
 import { FaDatabase } from "react-icons/fa";
 import ReactJson from "react-json-view";
 import TopBar from '../components/topBar/TopBar';
 import DropMenu from '../components/dropMenu/DropMenu';
+import ModalDialog from '../components/modalDialog/ModalDialog';
 
 import Storage from '../services/Storage';
 
 const electron = window.require('electron');
 const ipcRenderer = electron.ipcRenderer;
-const { dialog } = window.require('electron').remote
 
 export default () => {
     const [devices, setDevices] = useState([]);
@@ -25,55 +24,73 @@ export default () => {
     const [device, setDevice] = useState(null);
     const [fileRealm, setFileRealm] = useState('default.realm');
     const [dropMenu, setDropMenu] = useState(null);
+    const [modalDialog, setModalDialog] = useState(null);
 
     function loadingDevices() {
         const result = ipcRenderer.sendSync('@get-data', { action: 'DEVICES' });
-        let options = result.map(({ name, status }) => ({
-            value: name,
-            label: (
-                <span>{name}{' '}-{' '}
-                    <span className="text-select-status-device">{status}</span>
-                </span>)
-        }))
-        setDevices(options);
+        if (result instanceof Error) {
+            return setModalDialog({
+                type: 'ERROR',
+                title: 'Error',
+                message: result.message,
+                onClose: () => setModalDialog(null),
+            });
+        }
+        setDevices(result);
     }
 
-    function loadingSchemas(e) {
-        console.log({
-            package: packageApp,
-            device: device,
-            fileRealm
-        })
+    function loadingSchemas() {
         if (!packageApp) {
-            return dialog.showErrorBox('Validation', 'Inform the app package');
+            return setModalDialog({
+                type: 'ERROR',
+                title: 'Validation',
+                message: 'Inform the app package',
+                onClose: () => setModalDialog(null),
+            });
         }
         if (!device) {
-            return dialog.showErrorBox('Validation', 'Inform the device');
+            return setModalDialog({
+                type: 'ERROR',
+                title: 'Validation',
+                message: 'Inform the device',
+                onClose: () => setModalDialog(null),
+            });
         }
         if (!fileRealm) {
-            return dialog.showErrorBox('Validation', 'Enter the name of the realm data file, the default name is "default.realm"');
+            return setModalDialog({
+                type: 'ERROR',
+                title: 'Validation',
+                message: 'Enter the name of the realm data file, the default name is "default.realm"',
+                onClose: () => setModalDialog(null),
+            });
         }
         const result = ipcRenderer.sendSync('@get-data', {
             action: 'SCHEMAS', data: {
-                package: 'com.reactnativefinan',
-                device: 'emulator-5554',
-                fileRealm: 'default.realm'
+                package: packageApp,
+                device: device,
+                fileRealm: fileRealm
             }
         });
+        if (result instanceof Error) {
+            Storage.setLastData({
+                package: packageApp,
+                device: device,
+                fileRealm
+            });
+            return setModalDialog({
+                type: 'ERROR',
+                title: 'Error',
+                message: <span>{result.message}{HelpsAdb}</span>,
+                onClose: () => setModalDialog(null),
+            });
+        }
         Storage.setLastData({
             package: packageApp,
-            device: device.value,
+            device: device,
             fileRealm
         });
         setSchemas(result);
     }
-
-    const handleJsonView = useCallback((sch) => {
-        if (sch) {
-            setJsonView(schemas.find((obj) => obj.schema === sch).objects);
-            setSchemaFocus(sch);
-        }
-    }, [schemas]);
 
     function handleOpenMenuPackage(e) {
         setDropMenu({
@@ -85,22 +102,27 @@ export default () => {
     }
 
     function getItemsDropMenuPackage() {
-        return Storage.getLastData().map((item) => {
-            return (
-                <div key={item.package} className="box-item-menu-package">
-                    <div className="box-drop-item" onClick={(e) => handleItemDropMenuPackage(e, item)}>
-                        {item.package}
-                    </div>
-                    <div className="box-drop-item" onClick={(e) => handleDeleteItemDropMenuPackage(e, item)}>
-                        <FiTrash2 className="icon-package-delete" />
-                    </div>
+        return Storage.getLastData().reverse().map((item) => (
+            <div key={item.package} className="box-item-menu-package">
+                <div className="box-drop-item" onClick={(e) => handleItemDropMenuPackage(e, item)}>
+                    {item.package}
                 </div>
-            )
-        });
+                <div className="box-drop-item" onClick={(e) => handleDeleteItemDropMenuPackage(e, item)}>
+                    <FiTrash2 className="icon-package-delete" />
+                </div>
+            </div>
+        ));
+    }
+
+    function defineDataLast(item) {
+        setPackageApp(item.package);
+        setDevice(item.device)
+        setFileRealm(item.fileRealm);
     }
 
     function handleItemDropMenuPackage(e, item) {
-        setDropMenu(null)
+        defineDataLast(item);
+        setDropMenu(null);
         e.stopPropagation();
     }
 
@@ -110,19 +132,72 @@ export default () => {
         e.stopPropagation();
     }
 
-    useEffect(() => {
-        handleJsonView(schemaFocus);
-    }, [schemas, schemaFocus, handleJsonView])
+    function getDevice() {
+        return devices.find((it) => it.name === device)
+    }
+
+    function TextDevice({ device, className }) {
+        return (
+            <div className={`${className ? className : ''} text-name-device`}>
+                <div className="text-select-name-device">
+                    {device &&
+                        `${device?.name} / ${device?.status}`
+                    }
+                </div>
+                <div className={device?.root ? "text-select-status-device" : 'text-select-status-offline'}>
+                    {device &&
+                        (device?.root ? ' root' : ' not-root')
+                    }
+                </div>
+            </div>
+        );
+    }
+
+    function handleOpenMenuDevices(e) {
+        setDropMenu({
+            x: e.pageX,
+            y: e.pageY,
+            onClose: () => setDropMenu(null),
+            items: getItemsDropMenuDevices()
+        });
+    }
+
+    function getItemsDropMenuDevices() {
+        return devices.map((item) => (
+            <div key={item.name} onClick={() => handleSelectDevice(item)}>
+                <TextDevice device={item} className="box-item-menu-devices" />
+            </div>
+        ));
+    }
+
+    function handleSelectDevice(item) {
+        setDevice(item.name)
+    }
+
+    const handleJsonView = useCallback((sch) => {
+        if (sch) {
+            setJsonView(schemas.find((obj) => obj.schema === sch).objects);
+            setSchemaFocus(sch);
+        }
+    }, [schemas]);
 
     useEffect(() => {
         loadingDevices();
+        const lastData = Storage.getLastData().reverse();
+        if (lastData.length) {
+            defineDataLast(lastData[0]);
+        }
     }, []);
 
+    useEffect(() => {
+        handleJsonView(schemaFocus);
+    }, [schemas, schemaFocus, handleJsonView]);
 
     return (
         <div className="box-app">
             <TopBar />
             <DropMenu data={dropMenu} />
+            <ModalDialog data={modalDialog} />
             <div className="box-page">
                 <div className="box-params">
                     <div className="box-package">
@@ -134,16 +209,17 @@ export default () => {
                         </div>
                     </div>
                     <div className="box-device-file">
-                        <div className="text-label-device">Device:</div>
-                        <Select
-                            placeholder="Device"
-                            options={devices}
-                            className="select-device"
-                            styles={styleSelectDevice}
-                            value={device}
-                            onChange={setDevice}
-                        />
-                        <div className="text-label-file">File:</div>
+                        <div className="text-label-device label">Device:</div>
+                        <div className="select-device">
+                            <TextDevice device={getDevice()} />
+                            <div className="button-select-device" onClick={handleOpenMenuDevices}>
+                                <IoIosArrowDown className="icon-button-select-device" />
+                            </div>
+                        </div>
+                        <div className="button-refresh-devices" onClick={loadingDevices}>
+                            <IoIosRefresh className="icon-device-refresh" />
+                        </div>
+                        <div className="text-label-file label">File:</div>
                         <input type="text" className="input-file" value={fileRealm} onChange={(e) => setFileRealm(e.target.value)} />
                     </div>
                     <div className="box-button-pull">
@@ -156,7 +232,7 @@ export default () => {
                     <div className="box-schemas">
                         <div className="box-schemas-header">
                             <FaDatabase className="icon-schemas-database" />
-                            <div className="text-label-schemas">Schemas</div>
+                            <div className="text-label-schemas label">Schemas</div>
                         </div>
                         <div className="box-list-schemas">
                             {schemas.map((sch) => (
@@ -191,19 +267,11 @@ export default () => {
     );
 }
 
-
-const styleSelectDevice = {
-    control: (base, state) => ({
-        ...base,
-        color: '#FFF',
-        background: "#252529",
-        borderRadius: 10,
-        border: 'none',
-        boxShadow: 'none'
-    }),
-    singleValue: base => ({
-        ...base,
-        color: '#FFF',
-        border: 'none',
-    }),
-};
+const HelpsAdb = (
+    <span><br /><br />
+        <b>Help:</b><br />
+        * adb was not added to the path<br />
+        * Your physical device or emulator does not contain root<br />
+        * The reported file .realm does not exist on the device<br />
+    </span>
+)

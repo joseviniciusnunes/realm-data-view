@@ -1,24 +1,11 @@
-const { exec } = require("child_process");
+const { execSync } = require("child_process");
 const path = require("path");
-const fs = require("fs");
-
-async function clearDirectory() {
-    try {
-        fs.rmdirSync(path.resolve("temp", "db.realm.management"));
-    } catch (error) { }
-    try {
-        fs.unlinkSync(path.resolve("temp", "db.realm"));
-    } catch (error) { }
-    try {
-        fs.unlinkSync(path.resolve("temp", "db.realm.lock"));
-    } catch (error) { }
-}
+const Util = require('./util');
 
 async function copyFileDevice({ package, fileRealm, device }) {
     try {
-        await clearDirectory();
-        const fileTemp = path.resolve("temp", "db.realm");
-        const cmdDesc = `adb -s ${device} pull /data/data/${package}/files/${fileRealm} ${fileTemp}`;
+        await Util.clearFileTemp();
+        const cmdDesc = `adb -s ${device} pull "/data/data/${package}/files/${fileRealm}" "${Util.getFileRealmStorage()}"`;
         await cmd(cmdDesc);
     } catch (error) {
         throw error;
@@ -30,28 +17,47 @@ async function getDevices() {
     const result = await cmd(cmdDesc);
     const lines = result.split("\r\n");
     let devices = [];
-    lines.forEach((element, index) => {
-        if (index !== 0 && element !== "") {
-            const [name, status] = element.split("\t");
+    for (let index = 0; index < lines.length; index++) {
+        const item = lines[index];
+        if (index !== 0 && item !== "") {
+            const [name, status] = item.split("\t");
             devices.push({
                 name,
                 status,
+                root: await isDeviceRoot(name)
             });
         }
-    });
+    }
     return devices;
 }
 
-const cmd = (command) =>
-    new Promise((resolve, reject) => {
-        console.log("> ", command);
-        exec(command, (err, res) => {
-            if (err) {
-                return reject(err);
-            }
-            return resolve(res);
-        });
-    });
+async function isDeviceRoot(device) {
+    try {
+        const result = await cmd(`adb -s ${device} root`);
+        return result.indexOf('adbd is already running as root') >= 0;
+    } catch (error) {
+        return false;
+    }
+}
+
+async function existsAdbPath() {
+    try {
+        await cmd(`adb --version`);
+        return true;
+    } catch (error) {
+        return false;
+    }
+}
+
+async function cmd(dsCmd) {
+    try {
+        console.log('>', dsCmd);
+        return execSync(dsCmd).toString();
+    } catch (error) {
+        throw new Error(`${error.message}\n${error.stdout.toString()}`)
+    }
+}
 
 module.exports.copyFileDevice = copyFileDevice;
 module.exports.getDevices = getDevices;
+module.exports.existsAdbPath = existsAdbPath;

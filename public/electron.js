@@ -2,6 +2,7 @@ const { app, BrowserWindow } = require("electron");
 const isDev = require("electron-is-dev");
 const path = require("path");
 const electron = require('./src/background');
+const url = require('url');
 
 let mainWin;
 function createWindow() {
@@ -18,8 +19,12 @@ function createWindow() {
         },
     });
     const startURL = isDev
-        ? process.env.START_URL
-        : `file://${path.join(__dirname, "../build/index.html")}`;
+        ? 'http://localhost:3000'
+        : url.format({
+            pathname: path.join(__dirname, '/../build/index.html'),
+            protocol: 'file:',
+            slashes: true
+        });
 
     mainWin.loadURL(startURL);
     mainWin.webContents.on("did-finish-load", () => {

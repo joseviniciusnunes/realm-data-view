@@ -1,20 +1,21 @@
-
+const electron = window.require('electron');
+const ipcRenderer = electron.ipcRenderer;
 
 function getLastData() {
-    return JSON.parse(localStorage.getItem('@LastData')) ?? [];
+    const result = ipcRenderer.sendSync('@storage', { action: 'GET' });
+    return result;
 }
 
 function setLastData(data) {
-    let lastData = JSON.parse(localStorage.getItem('@LastData')) ?? [];
-    const newData = lastData.filter((item) => item.package !== data.package);
+    const newData = getLastData().filter((item) => item.package !== data.package);
     newData.push(data)
-    localStorage.setItem('@LastData', JSON.stringify(newData));
+    ipcRenderer.sendSync('@storage', { action: 'SAVE', obj: newData });
 }
 
 function deleteData(packageApp) {
-    let lastData = JSON.parse(localStorage.getItem('@LastData')) ?? [];
+    let lastData = ipcRenderer.sendSync('@storage', { action: 'GET' });
     const newData = lastData.filter((item) => item.package !== packageApp);
-    localStorage.setItem('@LastData', JSON.stringify(newData));
+    ipcRenderer.sendSync('@storage', { action: 'SAVE', obj: newData });
 }
 
 export default {

@@ -1,14 +1,12 @@
 const Realm = require("realm");
-const path = require("path");
-
+const Util = require('./util');
 const adb = require("./adb");
-const fileTemp = path.resolve("temp", "db.realm");
 
 let realm = null;
 
 async function open() {
     if (!realm) {
-        realm = await Realm.open({ path: fileTemp });
+        realm = await Realm.open({ path: Util.getFileRealmStorage() });
     }
 }
 
@@ -44,7 +42,7 @@ async function getAllObjSchema(schema) {
 
 async function getAllObjAllSchema({ package, device, schema, fileRealm }) {
     try {
-        await pullFile({ package, device });
+        await pullFile({ package, device, fileRealm });
         let data = [];
         const schemas = await getAllSchema();
         for (let sche of schemas) {
@@ -63,9 +61,9 @@ async function getAllObjAllSchema({ package, device, schema, fileRealm }) {
 
 async function pullFile({ package, device, fileRealm }) {
     await adb.copyFileDevice({
-        package: package,
-        device: device,
-        fileRealm: fileRealm,
+        package,
+        device,
+        fileRealm,
     });
 }
 

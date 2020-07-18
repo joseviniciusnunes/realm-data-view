@@ -1,9 +1,11 @@
 {
     "name": "realm-data-view",
-    "version": "0.1.0",
+    "version": "1.0.0",
     "private": true,
     "title": "Realm Data View",
+    "author": "joseviniciusnunes",
     "main": "public/electron.js",
+    "homepage": "./",
     "dependencies": {
         "@testing-library/jest-dom": "^4.2.4",
         "@testing-library/react": "^9.3.2",
@@ -14,17 +16,20 @@
         "react-icons": "^3.10.0",
         "react-json-view": "^1.19.1",
         "react-scripts": "3.4.1",
-        "react-select": "^3.1.0",
         "realm": "^6.0.3"
     },
     "scripts": {
-        "build": "react-scripts build",
+        "build": "set \"GENERATE_SOURCEMAP=false\" && react-scripts build",
         "test": "react-scripts test",
         "eject": "react-scripts eject",
         "start": "react-scripts start",
-        "start-electron": "set \"START_URL=http://localhost:3000\" && electron .",
+        "start-electron": "electron .",
         "pack": "electron-builder --dir",
-        "dist": "electron-builder"
+        "dist:win": "electron-builder --win",
+        "dist:linux": "electron-builder --linux",
+        "dist:mac": "electron-builder --mac",
+        "prod": "yarn build && electron-builder",
+        "postinstall": "electron-builder install-app-deps"
     },
     "eslintConfig": {
         "extends": "react-app"
@@ -42,11 +47,13 @@
         ]
     },
     "devDependencies": {
-        "electron": "^9.1.0",
+        "electron": "8.1.1",
         "electron-builder": "^22.7.0"
     },
     "build": {
         "appId": "com.joseviniciusnunes.realm-data-view",
+        "productName": "Realm Data View",
+        "icon": "public/icon.png",
         "mac": {
             "category": "tools"
         },
