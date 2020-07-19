@@ -11,7 +11,7 @@
 
 -   Adb must be in the system path
 -   The device must contain root
--   AVD use "Google APIs Intel x86 Atom System Image" not use "Google Play Intel x86 Atom System Image"
+-   AVD use "Google APIs Intel x86 Atom System Image", not use "Google Play Intel x86 Atom System Image"
 
 ##### Preview
 
