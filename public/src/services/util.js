@@ -23,7 +23,7 @@ function createFolderStorage(folder) {
 function getPathPlatformTools() {
     switch (process.platform) {
         case 'win32':
-            return `${process.env['USERPROFILE']}/AppData/Local/Android/sdk/platform-tools`;
+            return `${process.env['USERPROFILE']}\\AppData\\Local\\Android\\sdk\\platform-tools`;
         case 'darwin':
             return `${process.env['HOME']}/Library/Android/sdk/platform-tools`;
         case 'linux':
@@ -51,13 +51,13 @@ function getConfig() {
 async function clearFileTemp() {
     try {
         fs.rmdirSync(`${getFolderStorage()}/db.realm.management`);
-    } catch (error) {}
+    } catch (error) { }
     try {
         fs.unlinkSync(`${getFolderStorage()}/db.realm`);
-    } catch (error) {}
+    } catch (error) { }
     try {
         fs.unlinkSync(`${getFolderStorage()}/db.realm.lock`);
-    } catch (error) {}
+    } catch (error) { }
 }
 
 module.exports.getFolderStorage = getFolderStorage;
