@@ -22,6 +22,7 @@
 <br />
 <br />
 <br />
+
 ### Problems with adb path
 
 <p align="center">
