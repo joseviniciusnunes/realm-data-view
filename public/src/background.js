@@ -36,6 +36,9 @@ ipcMain.on('@get-data', async (event, param) => {
             case 'ADB_PATH':
                 event.returnValue = await Adb.existsAdbPath();
                 return;
+            case 'PLATFORM':
+                event.returnValue = process.platform;
+                return;
             default:
                 event.returnValue = [];
                 return;
