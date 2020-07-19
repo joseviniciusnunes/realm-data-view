@@ -5,7 +5,7 @@ const Util = require('./util');
 async function copyFileDevice({ package, fileRealm, device }) {
     try {
         await Util.clearFileTemp();
-        const cmdDesc = `adb -s ${device} pull "/data/data/${package}/files/${fileRealm}" "${Util.getFileRealmStorage()}"`;
+        const cmdDesc = ` -s ${device} pull "/data/data/${package}/files/${fileRealm}" "${Util.getFileRealmStorage()}"`;
         await cmd(cmdDesc);
     } catch (error) {
         throw error;
@@ -13,10 +13,9 @@ async function copyFileDevice({ package, fileRealm, device }) {
 }
 
 async function getDevices() {
-    const cmdDesc = 'adb devices';
+    const cmdDesc = ' devices';
     const result = await cmd(cmdDesc);
     const lines = result.split(getCharBreakLine());
-    console.log(lines);
     let devices = [];
     for (let index = 0; index < lines.length; index++) {
         const item = lines[index];
@@ -34,7 +33,7 @@ async function getDevices() {
 
 async function isDeviceRoot(device) {
     try {
-        const result = await cmd(`adb -s ${device} root`);
+        const result = await cmd(` -s ${device} root`);
         return result.indexOf('adbd is already running as root') >= 0;
     } catch (error) {
         return false;
@@ -43,7 +42,8 @@ async function isDeviceRoot(device) {
 
 async function existsAdbPath() {
     try {
-        await cmd(`adb --version`);
+        Util.createFileConfigAdb();
+        await cmd(` --version`);
         return true;
     } catch (error) {
         return false;
@@ -52,8 +52,10 @@ async function existsAdbPath() {
 
 async function cmd(dsCmd) {
     try {
-        console.log('>', dsCmd);
-        return execSync(dsCmd).toString();
+        const config = Util.getConfig();
+        const commandAdb = `cd ${config.path} && ./adb ${dsCmd}`;
+        console.log('>', commandAdb);
+        return execSync(commandAdb).toString();
     } catch (error) {
         throw new Error(`${error.message}\n${error.stdout.toString()}`);
     }
