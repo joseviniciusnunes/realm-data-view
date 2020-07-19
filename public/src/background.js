@@ -1,21 +1,21 @@
-const { ipcMain } = require("electron");
+const { ipcMain } = require('electron');
 const Adb = require('./services/adb');
 const Realm = require('./services/realm');
 const fs = require('fs');
-const isDev = require("electron-is-dev");
-const Util = require('./services/util')
+const isDev = require('electron-is-dev');
+const Util = require('./services/util');
 
 let mainWin;
 
-ipcMain.on("@window-action", (event, action) => {
+ipcMain.on('@window-action', (event, action) => {
     switch (action) {
         case 'CLOSE':
             return mainWin.close();
         case 'FULLSCREEN':
-            mainWin.maximize()
+            mainWin.maximize();
             return toFullScreen();
         case 'DROP':
-            mainWin.unmaximize()
+            mainWin.unmaximize();
             return toDropWindow();
         case 'MINIMIZE':
             return mainWin.minimize();
@@ -24,7 +24,7 @@ ipcMain.on("@window-action", (event, action) => {
     }
 });
 
-ipcMain.on("@get-data", async (event, param) => {
+ipcMain.on('@get-data', async (event, param) => {
     try {
         switch (param.action) {
             case 'DEVICES':
@@ -45,7 +45,7 @@ ipcMain.on("@get-data", async (event, param) => {
     }
 });
 
-ipcMain.on("@storage", async (event, param) => {
+ipcMain.on('@storage', async (event, param) => {
     try {
         switch (param.action) {
             case 'GET':
@@ -64,8 +64,8 @@ ipcMain.on("@storage", async (event, param) => {
 
 function setMainWin(win) {
     mainWin = win;
-    mainWin.on("maximize", toFullScreen);
-    mainWin.on("unmaximize", toDropWindow);
+    mainWin.on('maximize', toFullScreen);
+    mainWin.on('unmaximize', toDropWindow);
 }
 
 function toFullScreen() {
@@ -92,7 +92,7 @@ function saveStorage(obj) {
 
 function getFileStorage() {
     const env = isDev ? 'develop-' : '';
-    return `${Util.getFolderStorage()}\\${env}storage.json`
+    return `${Util.getFolderStorage()}/${env}storage.json`;
 }
 
 module.exports.setMainWin = setMainWin;

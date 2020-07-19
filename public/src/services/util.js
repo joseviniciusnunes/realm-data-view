@@ -1,7 +1,7 @@
 const fs = require('fs');
 
 function getFolderStorage() {
-    const folder = `${process.env[(process.platform == 'win32') ? 'USERPROFILE' : 'HOME']}\\.realm-data-view`;
+    const folder = `${process.env[process.platform == 'win32' ? 'USERPROFILE' : 'HOME']}/.realm-data-view`;
     createFolderStorage(folder);
     return folder;
 }
@@ -18,14 +18,14 @@ function createFolderStorage(folder) {
 
 async function clearFileTemp() {
     try {
-        fs.rmdirSync(`${getFolderStorage()}\\db.realm.management`);
-    } catch (error) { }
+        fs.rmdirSync(`${getFolderStorage()}/db.realm.management`);
+    } catch (error) {}
     try {
-        fs.unlinkSync(`${getFolderStorage()}\\db.realm`);
-    } catch (error) { }
+        fs.unlinkSync(`${getFolderStorage()}/db.realm`);
+    } catch (error) {}
     try {
-        fs.unlinkSync(`${getFolderStorage()}\\db.realm.lock`);
-    } catch (error) { }
+        fs.unlinkSync(`${getFolderStorage()}/db.realm.lock`);
+    } catch (error) {}
 }
 
 module.exports.getFolderStorage = getFolderStorage;

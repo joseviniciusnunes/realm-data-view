@@ -1,11 +1,10 @@
-
 import React, { useEffect, useState, useCallback } from 'react';
 import './App.css';
-import { MdAndroid } from "react-icons/md";
-import { IoIosArrowDown, IoIosRefresh } from "react-icons/io";
-import { FiTrash2 } from "react-icons/fi";
-import { FaDatabase } from "react-icons/fa";
-import ReactJson from "react-json-view";
+import { MdAndroid } from 'react-icons/md';
+import { IoIosArrowDown, IoIosRefresh } from 'react-icons/io';
+import { FiTrash2 } from 'react-icons/fi';
+import { FaDatabase } from 'react-icons/fa';
+import ReactJson from 'react-json-view';
 import TopBar from '../components/topBar/TopBar';
 import DropMenu from '../components/dropMenu/DropMenu';
 import ModalDialog from '../components/modalDialog/ModalDialog';
@@ -65,29 +64,35 @@ export default () => {
             });
         }
         const result = ipcRenderer.sendSync('@get-data', {
-            action: 'SCHEMAS', data: {
+            action: 'SCHEMAS',
+            data: {
                 package: packageApp,
                 device: device,
-                fileRealm: fileRealm
-            }
+                fileRealm: fileRealm,
+            },
         });
         if (result instanceof Error) {
             Storage.setLastData({
                 package: packageApp,
                 device: device,
-                fileRealm
+                fileRealm,
             });
             return setModalDialog({
                 type: 'ERROR',
                 title: 'Error',
-                message: <span>{result.message}{HelpsAdb}</span>,
+                message: (
+                    <span>
+                        {result.message}
+                        {HelpsAdb}
+                    </span>
+                ),
                 onClose: () => setModalDialog(null),
             });
         }
         Storage.setLastData({
             package: packageApp,
             device: device,
-            fileRealm
+            fileRealm,
         });
         setSchemas(result);
     }
@@ -97,26 +102,28 @@ export default () => {
             x: e.pageX,
             y: e.pageY,
             onClose: () => setDropMenu(null),
-            items: getItemsDropMenuPackage()
+            items: getItemsDropMenuPackage(),
         });
     }
 
     function getItemsDropMenuPackage() {
-        return Storage.getLastData().reverse().map((item) => (
-            <div key={item.package} className="box-item-menu-package">
-                <div className="box-drop-item" onClick={(e) => handleItemDropMenuPackage(e, item)}>
-                    {item.package}
+        return Storage.getLastData()
+            .reverse()
+            .map((item) => (
+                <div key={item.package} className="box-item-menu-package">
+                    <div className="box-drop-item" onClick={(e) => handleItemDropMenuPackage(e, item)}>
+                        {item.package}
+                    </div>
+                    <div className="box-drop-item" onClick={(e) => handleDeleteItemDropMenuPackage(e, item)}>
+                        <FiTrash2 className="icon-package-delete" />
+                    </div>
                 </div>
-                <div className="box-drop-item" onClick={(e) => handleDeleteItemDropMenuPackage(e, item)}>
-                    <FiTrash2 className="icon-package-delete" />
-                </div>
-            </div>
-        ));
+            ));
     }
 
     function defineDataLast(item) {
         setPackageApp(item.package);
-        setDevice(item.device)
+        setDevice(item.device);
         setFileRealm(item.fileRealm);
     }
 
@@ -128,26 +135,20 @@ export default () => {
 
     function handleDeleteItemDropMenuPackage(e, item) {
         Storage.deleteData(item.package);
-        setDropMenu(null)
+        setDropMenu(null);
         e.stopPropagation();
     }
 
     function getDevice() {
-        return devices.find((it) => it.name === device)
+        return devices.find((it) => it.name === device);
     }
 
     function TextDevice({ device, className }) {
         return (
             <div className={`${className ? className : ''} text-name-device`}>
-                <div className="text-select-name-device">
-                    {device &&
-                        `${device?.name} / ${device?.status}`
-                    }
-                </div>
-                <div className={device?.root ? "text-select-status-device" : 'text-select-status-offline'}>
-                    {device &&
-                        (device?.root ? ' root' : ' not-root')
-                    }
+                <div className="text-select-name-device">{device && `${device?.name} / ${device?.status}`}</div>
+                <div className={device?.root ? 'text-select-status-device' : 'text-select-status-offline'}>
+                    {device && (device?.root ? ' root' : ' not-root')}
                 </div>
             </div>
         );
@@ -158,7 +159,7 @@ export default () => {
             x: e.pageX,
             y: e.pageY,
             onClose: () => setDropMenu(null),
-            items: getItemsDropMenuDevices()
+            items: getItemsDropMenuDevices(),
         });
     }
 
@@ -171,15 +172,18 @@ export default () => {
     }
 
     function handleSelectDevice(item) {
-        setDevice(item.name)
+        setDevice(item.name);
     }
 
-    const handleJsonView = useCallback((sch) => {
-        if (sch) {
-            setJsonView(schemas.find((obj) => obj.schema === sch).objects);
-            setSchemaFocus(sch);
-        }
-    }, [schemas]);
+    const handleJsonView = useCallback(
+        (sch) => {
+            if (sch) {
+                setJsonView(schemas.find((obj) => obj.schema === sch).objects);
+                setSchemaFocus(sch);
+            }
+        },
+        [schemas]
+    );
 
     useEffect(() => {
         loadingDevices();
@@ -236,10 +240,12 @@ export default () => {
                         </div>
                         <div className="box-list-schemas">
                             {schemas.map((sch) => (
-                                <div key={sch.schema} className={`box-name-schema ${schemaFocus === sch.schema ? 'box-schema-focus' : ''}`} onClick={() => setSchemaFocus(sch.schema)}>
-                                    <div className="box-label-schema">
-                                        {sch.schema}
-                                    </div>
+                                <div
+                                    key={sch.schema}
+                                    className={`box-name-schema ${schemaFocus === sch.schema ? 'box-schema-focus' : ''}`}
+                                    onClick={() => setSchemaFocus(sch.schema)}
+                                >
+                                    <div className="box-label-schema">{sch.schema}</div>
                                     <div className="box-badge-schema" hidden={sch.objects.length === 0}>
                                         <div className="box-total-objects">{sch.objects.length}</div>
                                     </div>
@@ -248,7 +254,7 @@ export default () => {
                         </div>
                     </div>
                     <div className="box-data-view">
-                        {jsonView &&
+                        {jsonView && (
                             <ReactJson
                                 src={jsonView}
                                 collapsed={false}
@@ -259,19 +265,25 @@ export default () => {
                                 indentWidth={10}
                                 style={{ backgroundColor: '#363740' }}
                             />
-                        }
+                        )}
                     </div>
                 </div>
             </div>
         </div>
     );
-}
+};
 
 const HelpsAdb = (
-    <span><br /><br />
-        <b>Help:</b><br />
-        * adb was not added to the path<br />
-        * Your physical device or emulator does not contain root<br />
-        * The reported file .realm does not exist on the device<br />
+    <span>
+        <br />
+        <br />
+        <b>Help:</b>
+        <br />
+        * adb was not added to the path
+        <br />
+        * Your physical device or emulator does not contain root
+        <br />
+        * The reported file .realm does not exist on the device
+        <br />
     </span>
-)
+);

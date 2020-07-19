@@ -1,5 +1,5 @@
-const { execSync } = require("child_process");
-const path = require("path");
+const { execSync } = require('child_process');
+const path = require('path');
 const Util = require('./util');
 
 async function copyFileDevice({ package, fileRealm, device }) {
@@ -13,18 +13,19 @@ async function copyFileDevice({ package, fileRealm, device }) {
 }
 
 async function getDevices() {
-    const cmdDesc = "adb devices";
+    const cmdDesc = 'adb devices';
     const result = await cmd(cmdDesc);
-    const lines = result.split("\r\n");
+    const lines = result.split(getCharBreakLine());
+    console.log(lines);
     let devices = [];
     for (let index = 0; index < lines.length; index++) {
         const item = lines[index];
-        if (index !== 0 && item !== "") {
-            const [name, status] = item.split("\t");
+        if (index !== 0 && item !== '') {
+            const [name, status] = item.split('\t');
             devices.push({
                 name,
                 status,
-                root: await isDeviceRoot(name)
+                root: await isDeviceRoot(name),
             });
         }
     }
@@ -54,7 +55,18 @@ async function cmd(dsCmd) {
         console.log('>', dsCmd);
         return execSync(dsCmd).toString();
     } catch (error) {
-        throw new Error(`${error.message}\n${error.stdout.toString()}`)
+        throw new Error(`${error.message}\n${error.stdout.toString()}`);
+    }
+}
+
+function getCharBreakLine() {
+    switch (process.platform) {
+        case 'win32':
+            return '\r\n';
+        case 'darwin':
+        case 'linux':
+        default:
+            return '\n';
     }
 }
 
