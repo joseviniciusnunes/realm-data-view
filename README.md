@@ -18,3 +18,24 @@
 <p align="center">
   <img src="https://user-images.githubusercontent.com/22475804/87746674-8874d980-c7c7-11ea-887c-27cdd85d13a9.png">  
 </p>
+
+<br />
+<br />
+<br />
+### Problems with adb path
+
+<p align="center">
+  <img src="https://user-images.githubusercontent.com/22475804/87866700-39f84400-c95b-11ea-8481-5b57b68c6d12.png">  
+</p>
+
+##### Modify the file found at `<USER>`/.realm-data-view/config.json, enter the exact path of your Android/sdk/platform-tools.
+
+#### Example
+
+##### /home/bill/.realm-data-view/config.json
+
+```json
+{
+    "path": "/home/bill/Library/Android/sdk/platform-tools"
+}
+```
