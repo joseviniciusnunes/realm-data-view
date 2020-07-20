@@ -53,7 +53,7 @@ async function existsAdbPath() {
 async function cmd(dsCmd) {
     try {
         const config = Util.getConfig();
-        const commandAdb = `cd ${config.path} && ./adb ${dsCmd}`;
+        const commandAdb = process.platform === 'win32' ? `cd ${config.path} && adb ${dsCmd}` : `cd ${config.path} && ./adb ${dsCmd}`;
         console.log('>', commandAdb);
         return execSync(commandAdb).toString();
     } catch (error) {
